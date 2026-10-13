@@ -33,31 +33,11 @@ map("i", "<C-s>", "<Esc><Cmd>w<CR>")
 lmap("n", "a", "ф", "ggVG")
 
 ---------------------------------------------------------------------------
--- Глобальный буфер обмена (xclip)
----------------------------------------------------------------------------
--- Копировать выделенное: Ctrl+c
-map("v", "<C-c>", ":w !xclip -i -sel c<CR><CR>")
-
-local function clipboard_text()
-  local text = vim.fn.system("xclip -o -selection clipboard")
-  return (text:gsub("\r", ""))
-end
-
--- Вставить в нормальном режиме
-local function paste_global()
-  vim.fn.setreg("g", clipboard_text())
-  vim.cmd('normal! "gp')
-end
-
--- Вставить поверх выделения
-local function paste_global_visual()
-  vim.fn.setreg("g", clipboard_text())
-  vim.cmd('normal! gv"gp')
-end
-
-lmap("n", "v", "м", paste_global)
-lmap("v", "v", "м", ":<C-u>lua _G.paste_global_visual()<CR>")
-_G.paste_global_visual = paste_global_visual
+-- Глобальный буфер обмена (нативный регистр "+, без xclip)
+-- Требует vim.opt.clipboard = "unnamedplus" в settings.lua
+map("v", "<C-c>", '"+y')
+lmap("n", "v", "м", '"+p')
+lmap("v", "v", "м", '"+p')
 
 -- Копировать от текущего символа до конца строки
 map("n", "Y", "y$")
