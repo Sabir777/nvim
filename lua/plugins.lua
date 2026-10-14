@@ -42,15 +42,39 @@ require("lazy").setup({
     opts = {
       options = {
         icons_enabled = true,
-        theme = "auto",
-        section_separators = { left = "", right = "" },
-        component_separators = { left = "", right = "" },
+        theme = "powerline", -- вместо "auto"
+        section_separators = {
+          left = vim.fn.nr2char(0xe0b0),
+          right = vim.fn.nr2char(0xe0b2),
+        },
+        component_separators = {
+          left = vim.fn.nr2char(0xe0b1),
+          right = vim.fn.nr2char(0xe0b3),
+        },
       },
       sections = {
-        lualine_a = { "mode" },
+        lualine_a = {
+          {
+            "mode",
+            -- в узком окне показывать одну букву: N, I, V
+            fmt = function(s)
+              return vim.o.columns < 100 and s:sub(1, 1) or s
+            end,
+          },
+        },
         lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = { "filename" },
-        lualine_x = { "encoding", "fileformat", "filetype" },
+        lualine_c = { { "filename", path = 0 } },
+        lualine_x = {
+          -- кодировку показывать только если она не utf-8
+          {
+            "encoding",
+            cond = function()
+              local enc = vim.bo.fileencoding
+              return enc ~= "" and enc ~= "utf-8"
+            end,
+          },
+          "filetype",
+        },
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },
