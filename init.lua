@@ -7,6 +7,4 @@
 
 require("settings")
 require("keymaps")
-
--- plugins.lua пока не создан; подключаем безопасно, чтобы nvim не падал.
-pcall(require, "plugins")
+require("plugins")
