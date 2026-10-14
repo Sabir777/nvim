@@ -47,9 +47,7 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHo
 ---------------------------------------------------------------------------
 -- Тема
 ---------------------------------------------------------------------------
--- colorscheme industry больше не поставляется с vim/neovim по умолчанию.
--- Установи `industry` или `vim-industry` через lazy.nvim и раскомментируй:
--- vim.cmd("colorscheme industry")
+vim.cmd("colorscheme industry")
 
 ---------------------------------------------------------------------------
 -- Отступы
