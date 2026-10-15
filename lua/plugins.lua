@@ -98,11 +98,19 @@ require("lazy").setup({
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
+      "WhoIsSethDaniel/mason-tool-installer.nvim",
     },
     config = function()
       require("mason").setup()
       require("mason-lspconfig").setup({
         ensure_installed = { "pyright", "ruff" },
+      })
+
+      -- Mason-tool-installer: ставит debugpy и другие инструменты автоматически
+      require("mason-tool-installer").setup({
+        ensure_installed = { "debugpy" },
+        auto_update = false,
+        run_on_start = true,
       })
       vim.lsp.config("pyright", {
         root_markers = {
@@ -140,6 +148,119 @@ require("lazy").setup({
         },
       })
       vim.lsp.enable("ruff")
+    end,
+  },
+  -- Дебаггер: nvim-dap + UI + python-адаптер (замена vimspector)
+  {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
+      "mfussenegger/nvim-dap-python",
+    },
+    config = function()
+      local dap = require("dap")
+      local dapui = require("dapui")
+
+      dapui.setup()
+
+      -- Иконки брейкпоинтов: красный кружок
+      vim.fn.sign_define("DapBreakpoint", {
+        text = "🔴",
+        texthl = "DapBreakpoint",
+        linehl = "",
+        numhl = "",
+      })
+      vim.fn.sign_define("DapBreakpointCondition", {
+        text = "🟡",
+        texthl = "DapBreakpointCondition",
+        linehl = "",
+        numhl = "",
+      })
+      vim.fn.sign_define("DapStopped", {
+        text = "▶",
+        texthl = "DapStopped",
+        linehl = "DapStoppedLine",
+        numhl = "",
+      })
+
+      -- debugpy ставится через Mason, не засоряет систему/venv проекта
+      local mason_debugpy = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
+      local debugpy_python = vim.fn.executable(mason_debugpy) == 1 and mason_debugpy or "python3"
+      require("dap-python").setup(debugpy_python)
+
+      -- Конфигурации запуска по умолчанию
+      dap.configurations.python = {
+        {
+          type = "python",
+          request = "launch",
+          name = "Запустить файл",
+          program = "${file}",
+          pythonPath = function()
+            local venv = os.getenv("VIRTUAL_ENV")
+            if venv then
+              return venv .. "/bin/python"
+            end
+            return debugpy_python
+          end,
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "Запустить файл с аргументами",
+          program = "${file}",
+          args = function()
+            local args = vim.fn.input("Аргументы: ")
+            return vim.split(args, " +")
+          end,
+          pythonPath = function()
+            local venv = os.getenv("VIRTUAL_ENV")
+            if venv then
+              return venv .. "/bin/python"
+            end
+            return debugpy_python
+          end,
+        },
+        {
+          type = "python",
+          request = "attach",
+          name = "Attach к процессу",
+          processId = function()
+            return tonumber(vim.fn.input("PID процесса: "))
+          end,
+          pythonPath = function()
+            local venv = os.getenv("VIRTUAL_ENV")
+            if venv then
+              return venv .. "/bin/python"
+            end
+            return debugpy_python
+          end,
+        },
+      }
+
+      -- Авто-открытие/закрытие UI
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
+
+      -- Маппинги дебаггера
+      vim.keymap.set("n", "<F5>", dap.continue, { silent = true })
+      vim.keymap.set("n", "<F9>", dap.toggle_breakpoint, { silent = true })
+      vim.keymap.set("n", "<F10>", dap.step_over, { silent = true })
+      vim.keymap.set("n", "<F11>", dap.step_into, { silent = true })
+      vim.keymap.set("n", "<S-F11>", dap.step_out, { silent = true })
+      vim.keymap.set("n", "<F3>", dap.terminate, { silent = true })
+      vim.keymap.set("n", "<F4>", dap.restart, { silent = true })
+      vim.keymap.set("n", "<leader>di", dapui.eval, { silent = true })
+      vim.keymap.set("n", "<leader><F3>", function()
+        dap.terminate()
+        dapui.close()
+      end, { silent = true })
     end,
   },
 }, {
