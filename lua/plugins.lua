@@ -92,8 +92,24 @@ require("lazy").setup({
       disable_keymaps = false,
     },
   },
-},
-{
+  -- LSP: конфигурация серверов
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+    },
+    config = function()
+      require("mason").setup()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "pyright" },
+      })
+      -- Новый API Neovim 0.11+ (вместо устаревшего require("lspconfig"))
+      vim.lsp.config("pyright", {})
+      vim.lsp.enable("pyright")
+    end,
+  },
+}, {
   -- не проверять обновления плагинов автоматически
   checker = { enabled = false },
 })
