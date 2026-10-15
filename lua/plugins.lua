@@ -80,7 +80,20 @@ require("lazy").setup({
       },
     },
   },
-}, {
+  -- ИИ-автодополнение (ghost text)
+  {
+    "supermaven-inc/supermaven-nvim",
+    opts = {
+      keymaps = {
+        accept_suggestion = "<A-e>",
+        accept_word = "<A-w>",
+      },
+      disable_inline_completion = false,
+      disable_keymaps = false,
+    },
+  },
+},
+{
   -- не проверять обновления плагинов автоматически
   checker = { enabled = false },
 })
