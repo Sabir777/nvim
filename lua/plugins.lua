@@ -102,7 +102,7 @@ require("lazy").setup({
     config = function()
       require("mason").setup()
       require("mason-lspconfig").setup({
-        ensure_installed = { "pyright" },
+        ensure_installed = { "pyright", "ruff" },
       })
       vim.lsp.config("pyright", {
         root_markers = {
@@ -121,6 +121,25 @@ require("lazy").setup({
         },
       })
       vim.lsp.enable("pyright")
+
+      -- Ruff: линтер + форматтер (замена ruff-lsp)
+      vim.lsp.config("ruff", {
+        root_markers = {
+          "pyproject.toml",
+          "ruff.toml",
+          ".ruff.toml",
+          "setup.py",
+          "setup.cfg",
+          "requirements.txt",
+          ".git",
+        },
+        capabilities = {
+          textDocument = {
+            diagnostic = { dynamicRegistration = false },
+          },
+        },
+      })
+      vim.lsp.enable("ruff")
     end,
   },
 }, {
