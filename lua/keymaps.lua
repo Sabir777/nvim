@@ -174,7 +174,72 @@ map("i", "<C-k>", "<C-p>")
 ---------------------------------------------------------------------------
 -- Форматирование через ruff
 ---------------------------------------------------------------------------
-map("n", "<leader>f", "<Cmd>update<CR><Cmd>silent !ruff format %<CR><Cmd>checktime<CR><Cmd>redraw!<CR>")
+-- Ruff: автоисправление линт-ошибок и форматирование
+local function ruff_fix_and_format()
+  vim.cmd("update")
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  local ruff_client = nil
+  for _, c in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+    if c.name == "ruff" then ruff_client = c; break end
+  end
+
+  if not ruff_client then
+    vim.lsp.buf.format({ async = false })
+    return
+  end
+
+  local pending = 0
+
+  local function maybe_format()
+    if pending == 0 then
+      vim.defer_fn(function()
+        vim.lsp.buf.format({ async = false })
+      end, 100)
+    end
+  end
+
+  -- Запрашиваем code actions от ruff
+  ruff_client:request("textDocument/codeAction", {
+    textDocument = { uri = vim.uri_from_bufnr(bufnr) },
+    range = {
+      start = { line = 0, character = 0 },
+      ["end"] = { line = vim.api.nvim_buf_line_count(bufnr), character = 0 },
+    },
+    context = { only = { "quickfix", "source" }, diagnostics = {} },
+  }, function(err, actions)
+    if err or not actions then
+      maybe_format()
+      return
+    end
+    for _, action in ipairs(actions) do
+      local title = action.title or ""
+      if title:match("[Ff]ix all") or title:match("[Oo]rganize [Ii]mports") then
+        pending = pending + 1
+        -- Ruff возвращает action без edit/command — нужен resolve
+        ruff_client:request("codeAction/resolve", action, function(e, resolved)
+          if e or not resolved then
+            pending = pending - 1
+            maybe_format()
+            return
+          end
+          if resolved.edit then
+            vim.lsp.util.apply_workspace_edit(resolved.edit, ruff_client.offset_encoding)
+          elseif resolved.command then
+            ruff_client:exec_cmd(resolved.command, { bufnr = bufnr })
+          end
+          pending = pending - 1
+          maybe_format()
+        end)
+      end
+    end
+    if pending == 0 then
+      maybe_format()
+    end
+  end)
+end
+
+map("n", "<leader>f", ruff_fix_and_format)
 
 ---------------------------------------------------------------------------
 -- Аббревиатуры командной строки (русская раскладка)
