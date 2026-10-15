@@ -104,8 +104,22 @@ require("lazy").setup({
       require("mason-lspconfig").setup({
         ensure_installed = { "pyright" },
       })
-      -- Новый API Neovim 0.11+ (вместо устаревшего require("lspconfig"))
-      vim.lsp.config("pyright", {})
+      vim.lsp.config("pyright", {
+        root_markers = {
+          "pyproject.toml",
+          "setup.py",
+          "setup.cfg",
+          "requirements.txt",
+          "Pipfile",
+          "pyrightconfig.json",
+          ".git",
+        },
+        capabilities = {
+          textDocument = {
+            diagnostic = { dynamicRegistration = false },
+          },
+        },
+      })
       vim.lsp.enable("pyright")
     end,
   },
