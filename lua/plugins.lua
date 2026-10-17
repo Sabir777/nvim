@@ -263,6 +263,26 @@ require("lazy").setup({
       end, { silent = true })
     end,
   },
+  -- Проводник файлов (замена NERDTree)
+  {
+    "nvim-tree/nvim-tree.lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    init = function()
+      vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+    end,
+    opts = {
+      view = { width = 30 },
+      renderer = {
+        group_empty = true,
+        icons = { show = { git = true, folder = true, file = true, folder_arrow = true } },
+      },
+      filters = { dotfiles = false },
+      actions = {
+        open_file = { quit_on_open = false },
+      },
+    },
+  },
 }, {
   -- не проверять обновления плагинов автоматически
   checker = { enabled = false },

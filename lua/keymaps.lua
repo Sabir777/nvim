@@ -279,10 +279,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 ---------------------------------------------------------------------------
--- Привязки плагинов: добавишь вместе с плагинами
+-- Проводник файлов (nvim-tree)
 ---------------------------------------------------------------------------
--- NERDTree (<leader>p / бз)  -> nvim-tree / neo-tree / oil:
--- lmap("n", "p", "з", "<Cmd>NvimTreeToggle<CR>")
---
--- Отладчик (<leader><F3> VimspectorReset) -> nvim-dap:
--- map("n", "<leader><F3>", function() require("dapui").close() end)
+lmap("n", "p", "з", "<Cmd>NvimTreeToggle<CR>")
+map("n", "<leader>P", "<Cmd>NvimTreeFindFile<CR>")
