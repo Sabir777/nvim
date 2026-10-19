@@ -68,8 +68,8 @@ map("n", "<leader>=", "<Cmd>normal! ggVG=<CR>")
 ---------------------------------------------------------------------------
 -- Вкладки и буферы
 ---------------------------------------------------------------------------
-map("n", "<leader>ii", "<Cmd>tabprevious<CR>")
-map("n", "<leader>oo", "<Cmd>tabnext<CR>")
+map("n", "<leader>j", "<Cmd>tabprevious<CR>")
+map("n", "<leader>k", "<Cmd>tabnext<CR>")
 
 lmap("n", "i", "ш", "<Cmd>bprevious<CR>")
 lmap("n", "o", "щ", "<Cmd>bnext<CR>")
