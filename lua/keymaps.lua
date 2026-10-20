@@ -189,17 +189,8 @@ local function ruff_fix_and_format()
     return
   end
 
-  local pending = 0
+  local applied = false
 
-  local function maybe_format()
-    if pending == 0 then
-      vim.defer_fn(function()
-        vim.lsp.buf.format({ async = false })
-      end, 100)
-    end
-  end
-
-  -- Запрашиваем code actions от ruff
   ruff_client:request("textDocument/codeAction", {
     textDocument = { uri = vim.uri_from_bufnr(bufnr) },
     range = {
@@ -209,18 +200,19 @@ local function ruff_fix_and_format()
     context = { only = { "quickfix", "source" }, diagnostics = {} },
   }, function(err, actions)
     if err or not actions then
-      maybe_format()
+      vim.lsp.buf.format({ async = false })
       return
     end
     for _, action in ipairs(actions) do
       local title = action.title or ""
-      if title:match("[Ff]ix all") or title:match("[Oo]rganize [Ii]mports") then
-        pending = pending + 1
-        -- Ruff возвращает action без edit/command — нужен resolve
+      -- "Fix all" уже включает сортировку импортов.
+      -- "Organize imports" отдельно не запрашиваем — оба edit-а
+      -- вычислены для исходного файла и конфликтуют при наложении.
+      if title:match("[Ff]ix all") then
+        applied = true
         ruff_client:request("codeAction/resolve", action, function(e, resolved)
           if e or not resolved then
-            pending = pending - 1
-            maybe_format()
+            vim.lsp.buf.format({ async = false })
             return
           end
           if resolved.edit then
@@ -228,13 +220,15 @@ local function ruff_fix_and_format()
           elseif resolved.command then
             ruff_client:exec_cmd(resolved.command, { bufnr = bufnr })
           end
-          pending = pending - 1
-          maybe_format()
+          vim.defer_fn(function()
+            vim.lsp.buf.format({ async = false })
+          end, 100)
         end)
+        break
       end
     end
-    if pending == 0 then
-      maybe_format()
+    if not applied then
+      vim.lsp.buf.format({ async = false })
     end
   end)
 end
