@@ -283,6 +283,12 @@ require("lazy").setup({
       },
     },
   },
+  -- Список всех ошибок проекта (LazyVim-like)
+  {
+    "folke/trouble.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {},
+  },
 }, {
   -- не проверять обновления плагинов автоматически
   checker = { enabled = false },

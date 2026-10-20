@@ -283,3 +283,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
 ---------------------------------------------------------------------------
 lmap("n", "p", "з", "<Cmd>NvimTreeToggle<CR>")
 map("n", "<leader>P", "<Cmd>NvimTreeFindFile<CR>")
+
+---------------------------------------------------------------------------
+-- Список ошибок (trouble.nvim)
+---------------------------------------------------------------------------
+map("n", "<leader>xx", "<Cmd>Trouble diagnostics toggle<CR>")
+map("n", "<leader>xd", "<Cmd>Trouble diagnostics toggle filter.buf=0<CR>")

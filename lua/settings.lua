@@ -125,7 +125,14 @@ vim.api.nvim_create_autocmd("BufEnter", {
 ---------------------------------------------------------------------------
 vim.diagnostic.config({
   virtual_text = true,       -- текст ошибки в конце строки
-  signs = true,              -- значок слева (E/W)
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "E",
+      [vim.diagnostic.severity.WARN] = "W",
+      [vim.diagnostic.severity.INFO] = "I",
+      [vim.diagnostic.severity.HINT] = "H",
+    },
+  },
   underline = true,          -- подчёркивание ошибки
   update_in_insert = false,  -- не обновлять во время набора
   severity_sort = true,
