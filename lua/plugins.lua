@@ -27,6 +27,8 @@ require("lazy").setup({
       vim.g.NERDSpaceDelims = 1
       -- убирать лишние пробелы при раскомментировании
       vim.g.NERDRemoveExtraSpaces = 1
+      -- ставить курсор в начало строки при комментировании
+      vim.g.NERDDefaultAlign = "left"
       -- свои разделители
       vim.g.NERDCustomDelimiters = {
         c = { left = "//", right = "" },
