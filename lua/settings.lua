@@ -92,7 +92,7 @@ o.langmap = "ёйцукенгшщзхъфывапролджэячсмитьбю�
 ---------------------------------------------------------------------------
 -- Используем системный буфер (+ и *) напрямую, без xclip.
 -- На Linux Wayland/X11, macOS и Windows nvim умеет это нативно.
-o.clipboard = "unnamedplus"
+-- o.clipboard = "unnamedplus"
 
 ---------------------------------------------------------------------------
 -- Автосохранение при выходе из буфера
@@ -137,5 +137,22 @@ vim.diagnostic.config({
   update_in_insert = false,  -- не обновлять во время набора
   severity_sort = true,
 })
+
+-- :Swap: удалить старые swap-файлы текущего файла (после :recover)
+vim.api.nvim_create_user_command("Swap", function()
+  vim.cmd("write")
+  local dir = vim.fn.stdpath("state") .. "/swap"
+  if vim.fn.isdirectory(dir) == 0 then return end
+  local full = (vim.fn.expand("%:p"):gsub("/", "%%"))
+  local active = vim.fn.fnamemodify(vim.fn.swapname("%"), ":t")
+  for _, name in ipairs(vim.fn.readdir(dir)) do
+    if name ~= active
+      and name:sub(1, #full) == full
+      and name:sub(#full + 1):match("^%.sw.$") then
+      vim.fn.delete(dir .. "/" .. name)
+      print("Удалён swap: " .. name)
+    end
+  end
+end, {})
 
 return {}

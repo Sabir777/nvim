@@ -35,9 +35,19 @@ lmap("n", "a", "ф", "ggVG")
 ---------------------------------------------------------------------------
 -- Глобальный буфер обмена (нативный регистр "+, без xclip)
 -- Требует vim.opt.clipboard = "unnamedplus" в settings.lua
-map("v", "<C-c>", '"+y')
-lmap("n", "v", "м", '"+p')
-lmap("v", "v", "м", '"+p')
+-- map("v", "<C-c>", '"+y')
+-- lmap("n", "v", "м", '"+p')
+-- lmap("v", "v", "м", '"+p')
+
+-- Глобальный буфер (Termux): как в .vimrc, через termux-clipboard-get/set
+map("v", "<C-c>", '"zy<Cmd>call system("termux-clipboard-set", @z)<CR>')
+
+local function termux_paste()
+  vim.fn.setreg("g", vim.fn.system("termux-clipboard-get"))
+  return '"gp'
+end
+lmap("n", "v", "м", termux_paste, { expr = true })
+lmap("v", "v", "м", termux_paste, { expr = true })
 
 -- Копировать от текущего символа до конца строки
 map("n", "Y", "y$")
