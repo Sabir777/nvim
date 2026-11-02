@@ -84,15 +84,53 @@ require("lazy").setup({
   },
   -- ИИ-автодополнение (ghost text)
   {
-    "supermaven-inc/supermaven-nvim",
-    opts = {
-      keymaps = {
-        accept_suggestion = "<A-e>",
-        accept_word = "<A-w>",
-      },
-      disable_inline_completion = false,
-      disable_keymaps = false,
-    },
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        -- panel и suggestion — два независимых модуля
+        panel = {
+          enabled = true,
+          auto_refresh = false,
+          keymap = {
+            jump_prev = "[[",
+            jump_next = "]]",
+            accept = "<CR>",
+            refresh = "gr",
+            open = "<M-CR>",
+          },
+          layout = {
+            position = "bottom",
+            ratio = 0.4,
+          },
+        },
+        suggestion = {
+          enabled = true,
+          auto_trigger = true,
+          hide_during_completion = true,
+          debounce = 75,
+          keymap = {
+            accept = "<A-e>",    -- принять целиком (как было в Supermaven)
+            accept_word = "<A-w>",
+            accept_line = "<A-l>",
+            next = "<A-]>",
+            prev = "<A-[>",
+            dismiss = "<C-]>",
+          },
+        },
+        filetypes = {
+          -- по умолчанию включён везде; явно выключите где не нужен
+          ["*"] = true,
+          yaml = false,
+          markdown = false,
+          help = false,
+          gitcommit = false,
+          gitrebase = false,
+        },
+        copilot_node_command = "node",
+      })
+    end,
   },
   -- LSP: конфигурация серверов
   {
