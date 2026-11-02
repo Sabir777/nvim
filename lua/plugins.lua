@@ -291,6 +291,12 @@ require("lazy").setup({
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {},
   },
+  -- Автозакрытие парных скобок/кавычек
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    opts = {},
+  },
 }, {
   -- не проверять обновления плагинов автоматически
   checker = { enabled = false },
