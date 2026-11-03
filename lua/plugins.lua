@@ -88,7 +88,20 @@ require("lazy").setup({
     cmd = "Copilot",
     event = "InsertEnter",
     config = function()
+      -- Termux: у сервера нет нативного watcher.node для android/arm64,
+      -- подменяем его заглушкой (см. ~/copilot-stub.js)
+      local stub = vim.fn.expand("~/copilot-stub.js")
+      if vim.fn.filereadable(stub) == 1 then
+        vim.env.NODE_OPTIONS = "--require " .. stub
+      end
+
       require("copilot").setup({
+        server = {
+          type = "nodejs",
+          custom_server_filepath = (vim.env.PREFIX or "/usr")
+            .. "/lib/node_modules/@github/copilot-language-server/dist/language-server.js",
+        },
+        copilot_node_command = "node",
         -- panel и suggestion — два независимых модуля
         panel = {
           enabled = true,
@@ -111,7 +124,7 @@ require("lazy").setup({
           hide_during_completion = true,
           debounce = 75,
           keymap = {
-            accept = "<A-e>",    -- принять целиком (как было в Supermaven)
+            accept = "<A-e>",
             accept_word = "<A-w>",
             accept_line = "<A-l>",
             next = "<A-]>",
@@ -120,7 +133,6 @@ require("lazy").setup({
           },
         },
         filetypes = {
-          -- по умолчанию включён везде; явно выключите где не нужен
           ["*"] = true,
           yaml = false,
           markdown = false,
@@ -128,7 +140,6 @@ require("lazy").setup({
           gitcommit = false,
           gitrebase = false,
         },
-        copilot_node_command = "node",
       })
     end,
   },
